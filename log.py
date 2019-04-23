@@ -1,27 +1,42 @@
+"""Functions for working with logging."""
+
+import json_ as json
 import logging
-import json
+import os
 import sys
 import traceback
 
-from file import ensure, filename
+from datetime import datetime
 from functools import wraps
 from logging import FileHandler, Formatter, StreamHandler
-from timestamp import now
 
 
 def configure(file_level=None, file_path=None, stream_level=None):
-  """Configure JSON logging to handlers for a file or stream"""
+  """Configure logging to send JSON output to a file or formatted output to a stream. NOT FOR PRODUCTION.
+
+  This is meant for generating useful logs when debugging. It is not meant for production use.
+  It will remove default logging handlers from the root logger to avoid duplicate STDOUT logs.
+
+  @param file_level: If specified, will log this level of output to a file.
+  @type file_level: int
+  @param file_path: The path of the log file. Will default to the current POSIX timestamp if unspecified.
+  @type file_path: str
+  @param stream_level: If specified, will log this level of output to STDOUT.
+  @type stream_level: int
+  """
 
   root_logger = logging.getLogger()
   for handler in root_logger.handlers:
-    root_logger.removeHandler(handler)  # Remove any default handlers to avoid duplicate stdout logs
+    root_logger.removeHandler(handler)  # Remove any default handlers to avoid duplicate stdout logs.
   root_logger.setLevel(logging.DEBUG)
 
   if file_level:
     if file_path:
-      ensure(file_path.replace(filename(file_path), ""))
+      log_file = file_path.replace(os.path.basename(file_path), "")
+      if not os.path.exists(log_file):
+        os.makedirs(log_file)
     else:
-      file_path = "%s.log" % now()
+      file_path = "%s.log" % datetime.utcnow().timestamp
     fh = FileHandler(file_path, mode="a+")
     fh.setLevel(file_level)
     fh.setFormatter(JsonFormatter())
@@ -35,6 +50,15 @@ def configure(file_level=None, file_path=None, stream_level=None):
 
 
 def log_io(logger):
+  """A wrapper that will log input/output from a function at the DEBUG level. Input/output must be JSON-serializable.
+
+  @param logger: The logger object to use for writing all input and output.
+  @type logger: logging.Logger
+
+  @return: A function wrapper.
+  @rtype: function
+  """
+
   def inner_wrapper(func):
     @wraps(func)
     def wrapper(*args, **kwargs):
@@ -63,11 +87,13 @@ def log_io(logger):
 
 
 class JsonFormatter(logging.Formatter):
+  """A formatted for writing logs as JSON."""
+
   def __init__(self, *args, **kwargs):
     logging.Formatter.__init__(self, *args, **kwargs)
 
   def format(self, record):
-    dic = {
+    dct = {
       "args": (),
       "created": int(record.created),
       "exc_info": {
@@ -86,8 +112,8 @@ class JsonFormatter(logging.Formatter):
       "path": record.pathname
     }
     if record.exc_info:
-      dic["exc_info"]["traceback"] = traceback.format_tb(record.exc_info[2])
-      dic["exc_info"]["type"] = str(record.exc_info[0])
-      dic["exc_info"]["value"] = str(record.exc_info[1])
+      dct["exc_info"]["traceback"] = traceback.format_tb(record.exc_info[2])
+      dct["exc_info"]["type"] = str(record.exc_info[0])
+      dct["exc_info"]["value"] = str(record.exc_info[1])
 
-    return json.dumps(dic, sort_keys=True)
+    return json.dumps(dct)

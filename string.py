@@ -1,42 +1,38 @@
-import re
+"""Functions for working with strings."""
 
-from copy import deepcopy
+import re
 
 ALL_CAPS_REGEX = re.compile("([a-z0-9])([A-Z])")
 FIRST_CAP_REGEX = re.compile("(.)([A-Z][a-z]+)")
 
 
-def camel(source):
-  """Recursively convert dictionary keys in the source to camel case"""
+def snake_to_camel(string):
+  """Convert a snake case string to camel case.
 
-  res = deepcopy(source)  # Default return value
+  @param string: A snake case string to convert to camel case.
+  @type string: str
 
-  if isinstance(source, list) or isinstance(source, set):
-    res = [camel(v) for v in source]
+  @return: A camel case string.
+  @rtype: str
+  """
 
-  elif isinstance(source, dict):
-    res = {}
-    for k, v in source.items():
-      parts = k.split("_")
-      k = parts[0] + "".join(x.title() for x in parts[1:])
-      res[k] = camel(v)
+  parts = string.split("_")
+  if len(parts) == 1:
+    return parts[0]
 
-  return res
+  return parts[0] + "".join(i.title() for i in parts[1:])
 
 
-def snake(source):
-  """Recursively convert dictionary keys in the source to snake case"""
+def camel_to_snake(string):
+  """Convert a camel case string to snake case.
 
-  res = deepcopy(source)  # Default return value
+  @param string: A snake case string to convert to camel case.
+  @type string: str
 
-  if isinstance(source, list) or isinstance(source, set):
-    res = [snake(v) for v in source]
+  @return: A camel case string.
+  @rtype: str
+  """
 
-  elif isinstance(source, dict):
-    res = {}
-    for k, v in source.items():
-      k = FIRST_CAP_REGEX.sub(r"\1_\2", k)
-      k = ALL_CAPS_REGEX.sub(r"\1_\2", k).lower()
-      res[k] = snake(v)
+  partial_snake_case = FIRST_CAP_REGEX.sub(r"\1_\2", string)
 
-  return res
+  return ALL_CAPS_REGEX.sub(r"\1_\2", partial_snake_case).lower()

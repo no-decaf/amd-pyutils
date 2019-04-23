@@ -1,11 +1,11 @@
-import json
 import sys
 
 
-def pflush(output):
+def flush(output):
+  """Write the output to STDOUT and flush STDOUT.
+
+  @param output: The output to print.
+  @type output: str
+  """
   sys.stdout.write(output)
   sys.stdout.flush()
-
-
-def pjson(data):
-  print json.dumps(data, indent=2, sort_keys=True)

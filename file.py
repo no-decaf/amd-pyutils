@@ -1,7 +1,5 @@
 import os
 
-from data import notempty
-
 
 def ensure(path):
   if not os.path.exists(path):
@@ -21,7 +19,7 @@ def folder_path(file_magic_method):
 
 
 def join(*paths):
-  paths = notempty(paths)
+  paths = [i for i in paths if i]
   return os.path.sep.join(paths)
 
 
