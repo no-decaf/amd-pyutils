@@ -34,7 +34,7 @@ def first(itr):
 
 
 def group(itr, key):
-  """Group an iterable by dict key or grouping function, handling sorting and returning lists instead of generators.
+  """Group an iterable by dict key or grouping function. Handles sorting and returns lists.
 
   @param itr: The iterable containing items to group.
   @type itr: collections.abc.Iterable

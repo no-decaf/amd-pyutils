@@ -2,11 +2,15 @@
 
 import flatten_json
 import fnmatch
-import string
 
-from collections import Iterable
 from flatten_json import flatten as _flatten, unflatten_list
 from itertools import chain
+from amd_pyutils.str import camel_to_snake, snake_to_camel
+
+try:
+  from collections.abc import Iterable
+except ImportError:
+  from collections import Iterable
 
 # Monkeypatch flatten_json because it fails on unicode.
 flatten_json._unflatten_asserts = lambda _, __: None
@@ -20,7 +24,8 @@ def diff(dct1, dct2):
   @param dct2: The second dict to compare.
   @type dct2: dict
 
-  @return: A tuple with the items unique to dict 1, the items unique to dict 2, and the items common to both.
+  @return: A tuple with the items unique to dict 1, the items unique to dict 2, and the items common
+           to both.
   @rtype: tuple[dict, dict, dict]
   """
 
@@ -76,7 +81,7 @@ def keys_to_camel(obj):
   """
 
   if isinstance(obj, dict):
-    return {string.snake_to_camel(k): keys_to_camel(v) for k, v in obj.items()}
+    return {snake_to_camel(k): keys_to_camel(v) for k, v in obj.items()}
 
   if isinstance(obj, Iterable) and not isinstance(obj, str):
     return [keys_to_camel(v) for v in obj]
@@ -95,7 +100,7 @@ def keys_to_snake(obj):
   """
 
   if isinstance(obj, dict):
-    return {string.camel_to_snake(k): keys_to_snake(v) for k, v in obj.items()}
+    return {camel_to_snake(k): keys_to_snake(v) for k, v in obj.items()}
 
   if isinstance(obj, Iterable) and not isinstance(obj, str):
     return [keys_to_snake(v) for v in obj]
@@ -133,11 +138,12 @@ def match(dct, qry, qtype="all"):
 
 
 def project(dct, key_patterns):
-  """Project a dict to a set of key patterns. Use Unix shell wildcards and dot notation for nested structures.
+  """Project a dict to a set of key patterns. Supports Unix shell wildcards and dot notation.
 
   @param dct: The dict to project.
   @type dct: dict
-  @param key_patterns: An iterable of key patterns to match. Unix shell-style wildcards and dot notation are allowed.
+  @param key_patterns: An iterable of key patterns to match.
+                       Unix shell-style wildcards and dot notation are allowed.
   @type key_patterns: collections.abc.Iterable[str]
 
   @return: The projection of the dict.

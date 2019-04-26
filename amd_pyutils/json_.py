@@ -76,7 +76,8 @@ def _object_hook(dct):
     if isinstance(v, str):
       parsed = False
 
-      # datetime will parse date values, but date will not parse datetime values. So try to parse date first.
+      # datetime will parse date values, but date will not parse datetime values.
+      # So try to parse date first.
       try:
         dct[k] = date.fromisoformat(v)
         parsed = True

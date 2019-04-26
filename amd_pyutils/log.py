@@ -1,25 +1,25 @@
 """Functions for working with logging."""
 
-import json_ as json
 import logging
 import os
 import sys
 import traceback
 
+from amd_pyutils import json_ as json
 from datetime import datetime
 from functools import wraps
 from logging import FileHandler, Formatter, StreamHandler
 
 
 def configure(file_level=None, file_path=None, stream_level=None):
-  """Configure logging to send JSON output to a file or formatted output to a stream. NOT FOR PRODUCTION.
+  """Configure logging to send JSON to a file or formatted output to a stream. NOT FOR PRODUCTION.
 
   This is meant for generating useful logs when debugging. It is not meant for production use.
   It will remove default logging handlers from the root logger to avoid duplicate STDOUT logs.
 
   @param file_level: If specified, will log this level of output to a file.
   @type file_level: int
-  @param file_path: The path of the log file. Will default to the current POSIX timestamp if unspecified.
+  @param file_path: The path of the log file. Default to the current POSIX timestamp if unspecified.
   @type file_path: str
   @param stream_level: If specified, will log this level of output to STDOUT.
   @type stream_level: int
@@ -27,7 +27,7 @@ def configure(file_level=None, file_path=None, stream_level=None):
 
   root_logger = logging.getLogger()
   for handler in root_logger.handlers:
-    root_logger.removeHandler(handler)  # Remove any default handlers to avoid duplicate stdout logs.
+    root_logger.removeHandler(handler)  # Remove default handlers to avoid duplicate stdout logs.
   root_logger.setLevel(logging.DEBUG)
 
   if file_level:
@@ -50,7 +50,8 @@ def configure(file_level=None, file_path=None, stream_level=None):
 
 
 def log_io(logger):
-  """A wrapper that will log input/output from a function at the DEBUG level. Input/output must be JSON-serializable.
+  """A wrapper that will log input/output from a function at the DEBUG level.
+  Input/output must be JSON-serializable.
 
   @param logger: The logger object to use for writing all input and output.
   @type logger: logging.Logger
@@ -77,7 +78,7 @@ def log_io(logger):
           "value": res
         })
         return res
-      except:
+      except:  # noqa
         logger.exception({"method": func.__name__})
         raise
 
@@ -112,8 +113,10 @@ class JsonFormatter(logging.Formatter):
       "path": record.pathname
     }
     if record.exc_info:
-      dct["exc_info"]["traceback"] = traceback.format_tb(record.exc_info[2])
-      dct["exc_info"]["type"] = str(record.exc_info[0])
-      dct["exc_info"]["value"] = str(record.exc_info[1])
+      dct["exc_info"] = {
+        "traceback": traceback.format_tb(record.exc_info[2]),
+        "type": str(record.exc_info[0]),
+        "value": str(record.exc_info[1])
+      }
 
     return json.dumps(dct)

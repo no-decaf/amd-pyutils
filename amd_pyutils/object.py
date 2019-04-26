@@ -1,12 +1,15 @@
 """Functions for working with objects."""
 
-import json_ as json
-
-from collections import Iterable
+from amd_pyutils import json_ as json
 from datetime import date, datetime, time, timedelta, tzinfo
 
+try:
+  from collections.abc import Iterable
+except ImportError:
+  from collections import Iterable
+
 base_types = (
-  basestring, bytes, bytearray, complex, dict, float, frozenset, int, list, long, memoryview, range, set, tuple
+  bytes, bytearray, complex, dict, float, frozenset, int, list, memoryview, range, set, tuple
 )
 time_types = (date, datetime, time, timedelta, tzinfo)
 
@@ -14,7 +17,8 @@ time_types = (date, datetime, time, timedelta, tzinfo)
 def to_dict(obj):
   """Recursively convert an object into a dict. NOT FOR PRODUCTION.
 
-  This is meant for easily serializing objects so they can be inspected. It is not meant for production use.
+  This is meant for easily serializing objects so they can be inspected.
+  It is not meant for production use.
 
   @param obj: The object to convert.
   @type obj: object

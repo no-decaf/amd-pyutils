@@ -1,7 +1,7 @@
 import sys
 
 
-def flush(output):
+def write(output):
   """Write the output to STDOUT and flush STDOUT.
 
   @param output: The output to print.
