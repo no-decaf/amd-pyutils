@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+pydocstyle \
+  --match='(?!__init__.py).*\.py' \
+  .
+
+# C0330 is disabled to ensure compatibility with Python Black. This is a bug in pylint.
+# Reference:
+#   https://github.com/python/black/issues/48
+#   https://github.com/PyCQA/pylint/issues/289
+# C0412 is disabled because it conflicts with isort
+find . -iname '*.py' | xargs pylint \
+  --disable=C0330,C0412 \
+  --output-format=colorized

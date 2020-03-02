@@ -1,1 +1,3 @@
+include amd/util/config/.coveragerc
+include amd/util/doc/*.html
 include README.md
