@@ -1,6 +1,6 @@
 FROM python:3.8
-WORKDIR /home/root
+WORKDIR /app
 
 # Requirements
-COPY requirements.txt /home/root
+COPY requirements.txt /app
 RUN pip install -r requirements.txt
