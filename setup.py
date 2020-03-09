@@ -31,6 +31,6 @@ setuptools.setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     packages=setuptools.find_namespace_packages(exclude=["test"]),
-    url="https://bitbucket.org/adrenberg/amd-pyutils",
+    url="https://github.com/no-decaf/amd-pyutils",
     tests_require=["pytest>=4.4.1", "pytest-cov>=2.7.1"],
 )
