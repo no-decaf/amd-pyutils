@@ -20,8 +20,8 @@ def diff(
     :param dct1: The first dict to compare.
     :param dct2: The second dict to compare.
 
-    :return: A tuple with the items unique to dict 1, the items unique to dict 2, and
-             the items common to both.
+    :return: A tuple with the items unique to dict 1, the items unique to dict
+             2, and the items common to both.
     """
     dct1_set = set(flatten(dct1).items())
     dct2_set = set(flatten(dct2).items())
@@ -36,7 +36,9 @@ def diff(
     )
 
 
-def find(obj: Any, qry: Dict[str, Any], qtype: str = "all") -> List[Dict[str, Any]]:
+def find(
+    obj: Any, qry: Dict[str, Any], qtype: str = "all"
+) -> List[Dict[str, Any]]:
     """Recursively find dicts which match the query object.
 
     :param obj: An object containing dictionaries to search.
@@ -50,7 +52,9 @@ def find(obj: Any, qry: Dict[str, Any], qtype: str = "all") -> List[Dict[str, An
     if isinstance(obj, dict):
         if match(obj, qry, qtype):
             matches.append(obj)
-        matches.extend(chain.from_iterable([find(v, qry, qtype) for v in obj.values()]))
+        matches.extend(
+            chain.from_iterable([find(v, qry, qtype) for v in obj.values()])
+        )
 
     if isinstance(obj, Iterable) and not isinstance(obj, str):
         matches.extend(chain.from_iterable([find(i, qry, qtype) for i in obj]))
@@ -94,7 +98,9 @@ def match(dct: Dict[str, Any], qry: Dict[str, Any], qtype: str = "all") -> bool:
 
 
 def project(dct: Dict[str, Any], key_patterns: Iterable[str]) -> Dict[str, Any]:
-    """Project a dict to key patterns. Supports Unix shell wildcards and dot notation.
+    """Project a dict to key patterns.
+
+    Supports Unix shell wildcards and dot notation.
 
     :param dct: The dict to project.
     :param key_patterns: An iterable of key patterns to match. Unix shell-style
@@ -107,7 +113,9 @@ def project(dct: Dict[str, Any], key_patterns: Iterable[str]) -> Dict[str, Any]:
         [fnmatch.filter(flat_dct.keys(), i) for i in key_patterns]
     )
     unique_matching_keys = set(matching_keys)
-    projection = {k: v for k, v in flat_dct.items() if k in unique_matching_keys}
+    projection = {
+        k: v for k, v in flat_dct.items() if k in unique_matching_keys
+    }
 
     return unflatten(projection)
 

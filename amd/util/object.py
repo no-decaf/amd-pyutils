@@ -29,7 +29,8 @@ TIME_TYPES = (date, datetime, time, timedelta, tzinfo)
 def to_dict(obj: Any) -> Any:  # pylint: disable=R0911
     """Recursively convert an object to a dict.
 
-    NOT FOR PRODUCTION. This is meant for easily serializing objects during debugging.
+    NOT FOR PRODUCTION. This is meant for easily serializing objects during
+    debugging.
 
     :param obj: The object to convert.
 

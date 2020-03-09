@@ -13,7 +13,8 @@ def make_aware(obj: Any, tzinfo: _FixedOffset = pytz.UTC) -> Any:
     :param obj: A datetime or an object that may contain datetimes.
     :param tzinfo: The timezone to use for localization.
 
-    :return: A timezone-aware datetime or an object containing timezone-aware datetimes.
+    :return: A timezone-aware datetime or an object containing timezone-aware
+             datetimes.
     """
     if isinstance(obj, dict):
         return {k: make_aware(v, tzinfo=tzinfo) for k, v in obj.items()}

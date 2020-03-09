@@ -20,12 +20,12 @@ def configure(
     NOT FOR PRODUCTION.
 
     This is meant for generating useful logs when debugging. It is not meant for
-    production use. It will remove default logging handlers from the root logger to
-    avoid duplicate STDOUT logs.
+    production use. It will remove default logging handlers from the root logger
+    to avoid duplicate STDOUT logs.
 
     :param file_level: If specified, will log this level of output to a file.
-    :param file_path: The path of the log file. Default to the current POSIX timestamp
-                      if unspecified.
+    :param file_path: The path of the log file. Default to the current POSIX
+                      timestamp if unspecified.
     :param stream_level: If specified, will log this level of output to STDOUT.
     """
     root_logger = logging.getLogger()
@@ -50,7 +50,9 @@ def configure(
     if stream_level:
         stream_handler = StreamHandler(stream=sys.stdout)
         stream_handler.setLevel(stream_level)
-        stream_handler.setFormatter(Formatter("%(levelname)s:%(name)s: %(message)s"))
+        stream_handler.setFormatter(
+            Formatter("%(levelname)s:%(name)s: %(message)s")
+        )
         root_logger.addHandler(stream_handler)
 
 

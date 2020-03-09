@@ -6,8 +6,8 @@ Deserialization provides Python date and datetime objects.
 Any deserialized datetimes that are naive will be localized to UTC.
 
 Since this is primarily used for serializing JSON across API boundaries, the
-implementation closely follows the _json implementation from itsdangerous which is used
-by Flask.
+implementation closely follows the _json implementation from itsdangerous which
+is used by Flask.
 https://github.com/pallets/itsdangerous/blob/master/src/itsdangerous/_json.py
 """
 
@@ -36,7 +36,9 @@ def dumps(obj: Any) -> str:
     """
     obj = make_aware(obj)
 
-    return json.dumps(obj, default=_default, ensure_ascii=False, separators=(",", ":"))
+    return json.dumps(
+        obj, default=_default, ensure_ascii=False, separators=(",", ":")
+    )
 
 
 def loads(json_str: str) -> Union[Dict[str, Any], List[Any]]:
@@ -70,7 +72,7 @@ def _default(obj: Any) -> Optional[str]:
 
     :param obj: An object that is being serialized to JSON.
 
-    :return: An ISO 8601 formatted value if the object is a date type, otherwise None.
+    :return: An ISO 8601 formatted value if the object is a date, else None.
     """
     if isinstance(obj, (date, datetime)):
         return obj.isoformat()

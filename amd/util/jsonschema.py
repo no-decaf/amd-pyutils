@@ -1,6 +1,7 @@
-"""A JSON Schema validator that uses Draft 7 and handles defaults and date types.
+"""A JSON Schema validator for Draft 7 that handles defaults and date types.
 
-Timezones are required for all datetimes. Validation will fail without a timezone.
+Timezones are required for all datetimes. Validation will fail without a
+timezone.
 """
 
 from copy import deepcopy
@@ -40,8 +41,8 @@ def make_strict(schema: Dict[str, Any]) -> Dict[str, Any]:
             subschema["format"] = "date-time"
         subschema["type"] = "string"
 
-        # Remove the utcnow default value, since it's a function placeholder that
-        # doesn't apply to a formatted string type.
+        # Remove the utcnow default value, since it's a function placeholder
+        # that doesn't apply to a formatted string type.
         if subschema.get("default") == "utcnow":
             del subschema["default"]
 
@@ -56,10 +57,11 @@ def validate(
     :param instance: The instance to validate.
     :param schema: The schema to use for validation.
 
-    :return: A tuple with a copy of the instance with its default values set, and a list
-             of errors.
+    :return: A tuple with a copy of the instance with its default values set,
+             and a list of errors.
     """
-    # The validator sets defaults on the instance. Do not mutate the input instance.
+    # The validator sets defaults on the instance. Do not mutate the input
+    # instance.
     instance_copy = deepcopy(instance)
     validator = _Validator(schema, format_checker=FormatChecker())
     errors = list(validator.iter_errors(instance_copy))
@@ -79,7 +81,7 @@ def validate(
 
 
 def _extend_validator() -> Type[Draft7Validator]:
-    """Extend the Draft 7 validator with custom type checkers and custom validation.
+    """Extend the Draft 7 validator with custom type checkers and validation.
 
     :return: A class definition for a custom Draft 7 JSON Schema validator.
     """
@@ -87,7 +89,9 @@ def _extend_validator() -> Type[Draft7Validator]:
     extended_type_checker = Draft7Validator.TYPE_CHECKER.redefine_many(
         custom_type_checks
     )
-    extended_validator = extend(Draft7Validator, type_checker=extended_type_checker)
+    extended_validator = extend(
+        Draft7Validator, type_checker=extended_type_checker
+    )
 
     # Ensure the original validate function is passed to validate with defaults.
     validate_properties = extended_validator.VALIDATORS["properties"]
@@ -95,7 +99,9 @@ def _extend_validator() -> Type[Draft7Validator]:
         _validate_properties_with_defaults, validate_properties
     )
 
-    return extend(extended_validator, {"properties": custom_validate_properties})
+    return extend(
+        extended_validator, {"properties": custom_validate_properties}
+    )
 
 
 def _is_date(_: Optional[TypeChecker], instance: Any) -> bool:
@@ -141,8 +147,15 @@ def _validate_properties_with_defaults(
     :param schema: The schema to use for validation.
     """
     for prop, subschema in properties.items():
-        if prop in instance and instance[prop] is None and "default" in subschema:
-            if subschema["type"] == "datetime" and subschema["default"] == "utcnow":
+        if (
+            prop in instance
+            and instance[prop] is None
+            and "default" in subschema
+        ):
+            if (
+                subschema["type"] == "datetime"
+                and subschema["default"] == "utcnow"
+            ):
                 instance[prop] = utcnow()
             else:
                 instance[prop] = subschema["default"]

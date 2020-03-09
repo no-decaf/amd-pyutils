@@ -1,4 +1,4 @@
-"""Functions for working with Flask applications for JSON-only microservice APIs."""
+"""Functions for working with Flask applications for JSON-only APIs."""
 
 import json as stdlib_json
 from collections.abc import Iterable
@@ -21,7 +21,6 @@ except ImportError:
     # Try importlib_resources which is backported to Python < 3.7.
     import importlib_resources as import_resources
 
-
 OPEN_API: Dict[str, Optional[Union[bytes, str]]] = {
     "redoc_html": None,
     "spec_json": None,
@@ -31,7 +30,9 @@ OPEN_API: Dict[str, Optional[Union[bytes, str]]] = {
 
 
 def load_body() -> Union[Dict[str, Any], List[Any]]:
-    """Parse the request body with a JSON loader that handles date types and unicode.
+    """Parse the request body with a JSON loader.
+
+    Handles date types and unicode.
 
     :return: A dictionary or list with the request body.
     """
@@ -39,7 +40,7 @@ def load_body() -> Union[Dict[str, Any], List[Any]]:
 
 
 def load_querystring() -> Dict[str, Any]:
-    """Parse the querystring and handle dates, parameters for querying, and unicode.
+    """Parse the querystring and handle dates, query params, and unicode.
 
     :return: A dictionary with querystring parameters.
     """
@@ -47,8 +48,8 @@ def load_querystring() -> Dict[str, Any]:
 
     # Handle special parameters for querying.
     if "filter" in args:
-        # Filter is given an underscore because it is often passed as a keyword argument
-        # and "filter" masks Python's built-in function.
+        # Filter is given an underscore because it is often passed as a keyword
+        # argument and "filter" masks Python's built-in function.
         args["filter_"] = json.loads(args["filter"])
         del args["filter"]
     if "limit" in args:
@@ -56,15 +57,16 @@ def load_querystring() -> Dict[str, Any]:
     if "sort" in args:
         args["sort"] = args["sort"].split(",")
 
-    # Serialize to JSON and back again to parse date strings into Python objects.
+    # Serialize to JSON and back again to parse date strings into Python
+    # objects.
     return json.loads(json.dumps(args))
 
 
 def make_json_response(obj: Any) -> Response:
-    """Make a readable JSON response that is compliant with the JSON:API specification.
+    """Make a readable JSON response that is compliant with the JSON:API spec.
 
     Handles date types and unicode.
-    This should be the only function used to return JSON data from a Flask route.
+    This should be the only function used to return JSON from a Flask route.
 
     JSON:API Specification: https://jsonapi.org/
 
@@ -72,14 +74,14 @@ def make_json_response(obj: Any) -> Response:
         from flask import jsonify
         return jsonify({"key": val})
 
-    This approach is used instead of the Flask convention to avoid the extra work of
-    implementing a custom JSON Encoder and Decoder for Flask. The amd.util.json module
-    implements "dumps" and "loads" but no other json functions. Overriding
-    flask.json.JSONDecoder would require implementing numerous other functions to ensure
-    every use case is handled. Since the primary use case for microservice APIs just
-    involves handling JSON data that is RFC 8259 compliant, this is a simple way of
-    supporting JSON APIs. We can always build a more thorough implementation in the
-    future if we choose.
+    This approach is used instead of the Flask convention to avoid the extra
+    work of implementing a custom JSON Encoder and Decoder for Flask. The
+    amd.util.json module implements "dumps" and "loads" but no other json
+    functions. Overriding flask.json.JSONDecoder would require implementing
+    numerous other functions to ensure every use case is handled. Since the
+    primary use case for microservice APIs just involves handling JSON data that
+    is RFC 8259 compliant, this is a simple way of supporting JSON APIs. We can
+    always build a more thorough implementation in the future if we choose.
 
     Reference:
         https://github.com/pallets/flask/blob/master/flask/json/__init__.py
@@ -91,7 +93,7 @@ def make_json_response(obj: Any) -> Response:
 
     :return: A Flask response.
     """
-    # Ensure the "data" key is present if none of the top-level keys are present.
+    # Ensure the data key is present if none of the top-level keys are present.
     if not isinstance(obj, dict) or all(
         i not in obj for i in ("data", "errors", "meta")
     ):
@@ -105,9 +107,10 @@ def make_json_response(obj: Any) -> Response:
 
 
 def make_schema_response(schema: Any) -> Response:
-    """Make a readable response with strict JSON Schema that complies with JSON:API.
+    """Make a response with strict JSON Schema that complies with JSON:API.
 
-    :param schema: The JSON Schema object to convert to the body of the JSON response.
+    :param schema: The JSON Schema object to convert to the body of the JSON
+                   response.
 
     :return: A Flask response.
     """
@@ -126,31 +129,38 @@ def register_error_handlers(app: Union[Blueprint, Flask]) -> None:
     app.register_error_handler(500, _custom500)
 
 
-def register_openapi(app: Union[Blueprint, Flask], specfile: str = "spec.json") -> None:
+def register_openapi(
+    app: Union[Blueprint, Flask], specfile: str = "spec.json"
+) -> None:
     """Register OpenAPI endpoints. Assigns the root URL.
 
     :param app: The Flask application or blueprint to modify.
-    :param specfile: The path to the spec file containing OpenAPI JSON. This defaults to
-                     spec.json in the folder where Flask is running.
+    :param specfile: The path to the spec file containing OpenAPI JSON. This
+                     defaults to spec.json in the folder where Flask is running.
     """
     url_prefix = app.url_prefix if hasattr(app, "url_prefix") else ""
 
-    OPEN_API["redoc_html"] = import_resources.read_text(doc, "redoc.html").replace(
-        "{URL_PREFIX}", url_prefix
-    )
-    OPEN_API["swagger_html"] = import_resources.read_text(doc, "swagger.html").replace(
-        "{URL_PREFIX}", url_prefix
-    )
+    OPEN_API["redoc_html"] = import_resources.read_text(
+        doc, "redoc.html"
+    ).replace("{URL_PREFIX}", url_prefix)
+    OPEN_API["swagger_html"] = import_resources.read_text(
+        doc, "swagger.html"
+    ).replace("{URL_PREFIX}", url_prefix)
 
     with open(specfile, "rb") as inf:
         OPEN_API["spec_json"] = inf.read()
 
-    app.add_url_rule("/", endpoint="index", methods=["GET"], view_func=_get_index)
+    app.add_url_rule(
+        "/", endpoint="index", methods=["GET"], view_func=_get_index
+    )
     app.add_url_rule(
         "/spec", endpoint="spec", methods=["GET"], view_func=_get_spec_index
     )
     app.add_url_rule(
-        "/swagger", endpoint="swagger", methods=["GET"], view_func=_get_swagger_index
+        "/swagger",
+        endpoint="swagger",
+        methods=["GET"],
+        view_func=_get_swagger_index,
     )
 
 
@@ -169,7 +179,7 @@ def register_prometheus(app: Union[Blueprint, Flask], debug: bool) -> None:
 
 
 def validate(schema: Dict[str, Any]) -> Callable[[Any], Any]:
-    """Wrap a Flask endpoint and validate the request body, path, and querystring.
+    """Wrap a Flask endpoint and validate the body, path, and querystring.
 
     Converts custom JSON Schema to a strict schema before validating.
 
@@ -184,6 +194,7 @@ def validate(schema: Dict[str, Any]) -> Callable[[Any], Any]:
 
     :return: A function wrapper.
     """
+
     # noqa: D202
     def inner_wrapper(func):
         @wraps(func)
@@ -194,9 +205,9 @@ def validate(schema: Dict[str, Any]) -> Callable[[Any], Any]:
 
             request_data = {}
             if body:
-                # Strict JSON schema validates date and datetime values as string types
-                # with a format. Use the json module from the standard library to load
-                # JSON without parsing dates.
+                # Strict JSON schema validates date and datetime values as
+                # string types with a format. Use the json module from the
+                # standard library to load JSON without parsing dates.
                 request_data["request_body"] = stdlib_json.loads(body)
             if path:
                 request_data["request_path"] = deepcopy(path)
@@ -255,7 +266,9 @@ def _custom500(_: HTTPException) -> Response:
 
     :return: A Flask response.
     """
-    response = make_json_response({"errors": ["An unexpected error has occurred."]})
+    response = make_json_response(
+        {"errors": ["An unexpected error has occurred."]}
+    )
     response.status_code = 500
 
     return response
